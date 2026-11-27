@@ -26,9 +26,13 @@ sold prices.
    The worst flaw sets the best grade the photo supports. Any counterfeit tell stops the card for an
    authenticity check before money is spent.
 4. **Does the money maths for the cards worth it.** For a single card you choose, cloud Gemini with Google Search
-   grounding finds recent sold prices (raw, PSA 10, 9, 8). The app weighs the expected graded value against the
-   grading fee and shipping and says *send it* or *keep it raw*. The grading fee table comes from Firebase Remote
-   Config, so it can be updated without a release.
+   grounding looks up recent sold prices (raw, PSA 10, 9, 8). The prices stay editable, so you can correct them or
+   type your own. The app weighs the expected graded value against the grading fee and shipping and says *send it*
+   or *keep it raw*. The grading fee table comes from Firebase Remote Config, so it can be updated without a
+   release.
+
+   Google Search grounding needs a paid Gemini plan. The public demo runs on the free tier, so there the app says
+   the search is off and asks for the sold prices instead. The decision works the same either way.
 
 ## How the hybrid works
 
@@ -37,7 +41,7 @@ sold prices.
 | Centering, corners, edges, line detector | Your browser (plain TypeScript) | Nothing |
 | Surface question, reading the printed text | **Gemini Nano in Chrome** (`InferenceMode.PREFER_ON_DEVICE`) | Nothing |
 | Same two questions when Nano isn't available | Cloud Gemini through Firebase AI Logic, same prompt and schema | Two cropped JPEGs of the card |
-| Sold prices | Cloud Gemini with Google Search grounding (`ONLY_IN_CLOUD`) | The card name and number as text |
+| Sold prices (paid Gemini plan only) | Cloud Gemini with Google Search grounding (`ONLY_IN_CLOUD`) | The card name and number as text |
 
 - `src/ai.ts` builds every model with `getGenerativeModel(ai, { mode, inCloudParams, onDeviceParams })`. The
   on-device and cloud paths share one prompt and one response schema, and `response.inferenceSource` records which

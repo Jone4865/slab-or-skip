@@ -3,7 +3,7 @@ import { deviceStatus, initDeviceModel, lookUpValue, readCard, setCloudModel, ty
 import { assembleRead } from './domain/assemble';
 import type { CornerWear } from './domain/defects';
 import { loadRuntimeConfig, type RuntimeConfig } from './firebase';
-import { gradingEconomics, verdict, type Band, type ConditionRead, type Verdict } from './domain/grading';
+import { verdict, type Band, type ConditionRead, type Verdict } from './domain/grading';
 import { DEFAULT_FEES, tierFee } from './domain/fees';
 import { fetchAsBlob, prepareImage, type Prepared } from './image';
 import { CardRow } from './components/CardRow';
@@ -122,7 +122,10 @@ export default function App() {
     try {
       update(id, { value: await lookUpValue(query) });
     } catch (e) {
-      update(id, { value: { prices: { raw: null, psa10: null, psa9: null, psa8: null, currency: 'USD' }, sources: [], summary: `Couldn’t reach the price search: ${e instanceof Error ? e.message.slice(0, 120) : e}`, ms: 0 } });
+      const msg = e instanceof Error ? e.message : String(e);
+      // A project without a paid Gemini plan has no Google Search grounding quota: say so and let the collector type prices.
+      const unavailable = /429|quota|RESOURCE_EXHAUSTED/i.test(msg);
+      update(id, { value: { prices: { raw: null, psa10: null, psa9: null, psa8: null, currency: 'USD' }, sources: [], summary: unavailable ? '' : 'The price search didn’t answer. Try again, or type the prices in.', ms: 0, unavailable } });
     }
   }
 
@@ -275,7 +278,6 @@ export default function App() {
                   shipping={cfg.fees.shippingPerCard}
                   onClose={() => setSelected(null)}
                   onCheckValue={(q) => checkValue(sel.id, q)}
-                  economics={sel.value && sel.verdict ? gradingEconomics(sel.verdict.ceiling, sel.value.prices, fee.fee, cfg.fees.shippingPerCard) : null}
                 />
               )}
             </div>

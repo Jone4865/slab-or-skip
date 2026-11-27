@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CardItem } from '../App';
-import type { Economics } from '../domain/grading';
+import { gradingEconomics, type Prices } from '../domain/grading';
 import type { FeeTier } from '../domain/fees';
 import { CenteringOverlay } from './CenteringOverlay';
 import { BAND_TEXT } from './CardRow';
@@ -8,13 +8,16 @@ import { BAND_TEXT } from './CardRow';
 const pretty = (s: string) => s.replace(/_/g, ' ');
 const money = (n: number) => `$${n.toFixed(2)}`;
 
-export function CardDetail({ card, fee, shipping, onClose, onCheckValue, economics }: {
+type PriceKey = 'raw' | 'psa10' | 'psa9' | 'psa8';
+const PRICE_KEYS: Array<[PriceKey, string]> = [['raw', 'Raw'], ['psa10', 'PSA 10'], ['psa9', 'PSA 9'], ['psa8', 'PSA 8']];
+const EMPTY: Record<PriceKey, string> = { raw: '', psa10: '', psa9: '', psa8: '' };
+
+export function CardDetail({ card, fee, shipping, onClose, onCheckValue }: {
   card: CardItem;
   fee: FeeTier;
   shipping: number;
   onClose: () => void;
   onCheckValue: (query: string) => void;
-  economics: Economics | null;
 }) {
   const r = card.read;
   const c = card.prepared.centering;
@@ -22,8 +25,21 @@ export function CardDetail({ card, fee, shipping, onClose, onCheckValue, economi
   const suggested = [r?.cardName || card.label, r?.cardNumber].filter(Boolean).join(' ');
   const [query, setQuery] = useState(card.valueQuery ?? suggested);
   const [busy, setBusy] = useState(false);
-  useEffect(() => { setQuery(card.valueQuery ?? suggested); setBusy(false); }, [card.id]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (card.value) setBusy(false); }, [card.value]);
+  // Sold prices are editable: filled in by the search when it finds them, typed in by the collector otherwise.
+  const [prices, setPrices] = useState<Record<PriceKey, string>>(EMPTY);
+  useEffect(() => { setQuery(card.valueQuery ?? suggested); setBusy(false); setPrices(EMPTY); }, [card.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!card.value) return;
+    setBusy(false);
+    const found = card.value.prices;
+    setPrices((p) => Object.fromEntries(PRICE_KEYS.map(([k]) => [k, found[k] !== null ? String(found[k]) : p[k]])) as Record<PriceKey, string>);
+  }, [card.value]);
+  const parsed: Prices = { ...(Object.fromEntries(PRICE_KEYS.map(([k]) => {
+    const n = Number(prices[k].replace(/[$,\s]/g, ''));
+    return [k, prices[k].trim() && Number.isFinite(n) && n > 0 ? n : null];
+  })) as Record<PriceKey, number | null>), currency: 'USD' };
+  const economics = card.verdict ? gradingEconomics(card.verdict.ceiling, parsed, fee.fee, shipping) : null;
+  const searchOff = !!card.value?.unavailable;
   useEffect(() => {
     const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', k);
@@ -86,27 +102,31 @@ export function CardDetail({ card, fee, shipping, onClose, onCheckValue, economi
               <button className="btn primary" disabled={busy || !query.trim()}>{busy ? 'Searching…' : 'Check prices'}</button>
             </form>
 
-            {card.value && (
-              <>
-                <table className="prices">
-                  <thead><tr><th>Sold prices</th><th>Raw</th><th>PSA 10</th><th>PSA 9</th><th>PSA 8</th></tr></thead>
-                  <tbody><tr><td className="muted" style={{ fontSize: 13, fontWeight: 400 }}>USD</td>{[card.value.prices.raw, card.value.prices.psa10, card.value.prices.psa9, card.value.prices.psa8].map((p, i) => <td key={i}>{p === null ? <span className="muted">–</span> : money(p)}</td>)}</tr></tbody>
-                </table>
-                {economics && economics.decision !== 'UNKNOWN' ? (
-                  <div className={`decision ${economics.decision.toLowerCase()}`}>
-                    <span className="verdict">{economics.decision === 'SLAB' ? 'Send it to the grader' : 'Keep it raw'}</span>
-                    <span className="num">Expected after grading {money(economics.expectedGraded)} − fee {money(fee.fee)} − shipping {money(shipping)} vs raw {money(economics.rawValue)}</span>
-                    <span className={`net num ${economics.netGain > 0 ? 'pos' : 'neg'}`}>{economics.netGain >= 0 ? '+' : '−'}{money(Math.abs(economics.netGain))} a card</span>
-                    <span className="muted small">Odds from the photo’s best grade: {economics.breakdown.map((b) => `${b.grade}: ${Math.round(b.odds * 100)}%`).join(' · ')}. A rule of thumb, not a grader’s model.</span>
-                  </div>
-                ) : (
-                  <p className="note">Not enough sold prices to decide. Add the set name and number and search again.</p>
-                )}
-                {card.value.summary && <p className="note small">{card.value.summary}</p>}
-                {card.value.sources.length > 0 && (
-                  <ul className="sources">{card.value.sources.map((s) => <li key={s.url}><a href={s.url} target="_blank" rel="noreferrer">{s.title || new URL(s.url).hostname}</a></li>)}</ul>
-                )}
-              </>
+            {searchOff && <p className="note">Live price search isn’t switched on for this deployment (Google Search grounding needs a paid Gemini plan). Type the sold prices you see on recent listings instead.</p>}
+            {card.value && !searchOff && card.value.summary && <p className="note small">{card.value.summary}</p>}
+
+            <fieldset className="price-grid">
+              <legend>Recent sold prices, USD</legend>
+              {PRICE_KEYS.map(([k, label]) => (
+                <label key={k}>
+                  <span>{label}</span>
+                  <input inputMode="decimal" value={prices[k]} placeholder="–" onChange={(e) => setPrices((p) => ({ ...p, [k]: e.target.value }))} />
+                </label>
+              ))}
+            </fieldset>
+
+            {economics && economics.decision !== 'UNKNOWN' ? (
+              <div className={`decision ${economics.decision.toLowerCase()}`}>
+                <span className="verdict">{economics.decision === 'SLAB' ? 'Send it to the grader' : 'Keep it raw'}</span>
+                <span className="num">Expected after grading {money(economics.expectedGraded)} − fee {money(fee.fee)} − shipping {money(shipping)} vs raw {money(economics.rawValue)}</span>
+                <span className={`net num ${economics.netGain > 0 ? 'pos' : 'neg'}`}>{economics.netGain >= 0 ? '+' : '−'}{money(Math.abs(economics.netGain))} a card</span>
+                <span className="muted small">Odds from the photo’s best grade: {economics.breakdown.map((b) => `${b.grade}: ${Math.round(b.odds * 100)}%`).join(' · ')}. A rule of thumb, not a grader’s model.</span>
+              </div>
+            ) : (
+              <p className="note small">Needs the raw price and a PSA 10 or PSA 9 price to decide.</p>
+            )}
+            {card.value && card.value.sources.length > 0 && (
+              <ul className="sources">{card.value.sources.map((src) => <li key={src.url}><a href={src.url} target="_blank" rel="noreferrer">{src.title || new URL(src.url).hostname}</a></li>)}</ul>
             )}
           </section>
         )}

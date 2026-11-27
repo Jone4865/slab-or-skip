@@ -167,10 +167,10 @@ select.control { height: var(--control-height); border: 1px solid var(--control)
 .leaves code { font-family: var(--mono); font-size: 12px; background: var(--raised); padding: 2px 6px; border-radius: 4px; color: var(--text); }
 .value-form { display: flex; gap: 8px; }
 .value-form input { flex: 1; min-width: 0; height: var(--control-height); border: 1px solid var(--control); border-radius: var(--radius-control); padding: 0 10px; background: var(--surface); }
-.prices { width: 100%; border-collapse: collapse; margin-top: 12px; font-variant-numeric: tabular-nums; }
-.prices th { color: var(--muted); font-weight: 400; font-size: 12px; text-align: right; padding: 0 0 4px; }
-.prices td { text-align: right; font-size: 16px; font-weight: 500; padding: 2px 0; }
-.prices th:first-child, .prices td:first-child { text-align: left; }
+.price-grid { margin: 12px 0 0; padding: 0; border: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.price-grid legend { padding: 0; margin-bottom: 6px; color: var(--muted); font-size: 12px; }
+.price-grid label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.price-grid input { width: 100%; height: var(--control-height); border: 1px solid var(--control); border-radius: var(--radius-control); padding: 0 8px; background: var(--surface); color: var(--text); font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .decision { margin-top: 12px; padding: 14px 16px; border-radius: var(--radius-card); background: var(--raised); display: grid; gap: 4px; }
 .decision .verdict { font-size: 18px; font-weight: 600; }
 .decision.slab .verdict { color: var(--hue); }

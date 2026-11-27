@@ -145,6 +145,8 @@ export async function readCard(crops: { card: string; text: string }, forceCloud
 
 export interface ValueLookup {
   prices: Prices;
+  /** True when the project has no quota for Google Search grounding (free tier). */
+  unavailable?: boolean;
   sources: Array<{ title: string; url: string }>;
   summary: string;
   ms: number;
@@ -164,7 +166,7 @@ Use Google Search for recent SOLD listings or price guides (last 90 days). Repor
 raw (ungraded, near mint), psa10, psa9, psa8. Use null when you cannot find a number; never invent one.
 Answer with ONE fenced json block: {"raw":number|null,"psa10":number|null,"psa9":number|null,"psa8":number|null,"currency":"USD","summary":"one sentence on where the numbers came from"}`;
   const vm = valueModel;
-  const result = await withRetry(() => vm.generateContent(prompt));
+  const result = await withRetry(() => vm.generateContent(prompt), 2);
   const r = result.response;
   let parsed: Partial<Prices & { summary: string }> = {};
   try { parsed = JSON.parse(stripFence(r.text())); } catch { /* keep empty */ }

@@ -34,6 +34,18 @@ const IGN = ['--disable-field-trial-config','--disable-background-networking','-
   const kpis = await page.$$eval('.kpi', (s) => s.map((x) => x.innerText.replace(/\n/g, ' ')));
   const proof = await page.textContent('.proof');
   const detail = await page.evaluate(() => (window.__slab || []).map((c) => `${c.label.padEnd(12)} truth=${c.truth?.ceiling}${c.truth?.counterfeit ? 'F' : ''} got=${c.verdict?.ceiling}/${c.verdict?.band} ${c.error ?? ''}| surf=${JSON.stringify(c.reads?.surface)} | text=${JSON.stringify(c.reads?.text)} | edge=${c.wear?.edge?.toFixed?.(3)} m=${c.wear?.measurable}`));
+  let price = null;
+  if (process.argv.includes('--price')) {
+    await page.click('.row:has-text("Emberfox")');
+    await page.click('.value-form button');
+    await page.waitForFunction(() => !document.querySelector('.value-form button')?.textContent?.includes('Searching'), null, { timeout: 150000 });
+    const inputs = await page.$$('.price-grid input');
+    for (const [i, v] of ['60', '300', '110', '70'].entries()) if (!(await inputs[i].inputValue())) await inputs[i].fill(v);
+    await page.waitForTimeout(300);
+    price = await page.$eval('.pane .sec:last-child', (e) => e.innerText.replace(/\n+/g, ' | ').slice(0, 700));
+    if (shots) await page.screenshot({ path: `${shots}/11-price.png` });
+    await page.click('.pane .btn.quiet');
+  }
   if (shots) {
     await page.screenshot({ path: `${shots}/04-done-1440.png`, fullPage: true });
     await page.click('.row:has-text("Tidepup")');
@@ -60,7 +72,7 @@ const IGN = ['--disable-field-trial-config','--disable-background-networking','-
     for (const [i, y] of [paneY - 80, paneY + 620].entries()) { await page.evaluate((y) => window.scrollTo(0, y), y); await page.waitForTimeout(150); await page.screenshot({ path: `${shots}/10-detail-390-${i}.png` }); }
     console.log('scrollWidth', JSON.stringify(overflow));
   }
-  console.log(JSON.stringify({ model, mode: cloud ? 'cloud' : 'hybrid', secs, finding, kpis, proof, errors: logs.slice(0, 5), bad: bad.slice(0, 12), rowErrors: await page.$$eval('.row', (rs) => rs.filter((r) => r.querySelector('.err')).map((r) => r.querySelector('.ident b').textContent)) }, null, 1));
+  console.log(JSON.stringify({ model, mode: cloud ? 'cloud' : 'hybrid', secs, finding, kpis, proof, price, errors: logs.slice(0, 5), bad: bad.slice(0, 12), rowErrors: await page.$$eval('.row', (rs) => rs.filter((r) => r.querySelector('.err')).map((r) => r.querySelector('.ident b').textContent)) }, null, 1));
   if (process.argv.includes('--detail')) console.log(detail.join('\n'));
   await ctx.close();
   process.exit(0);
