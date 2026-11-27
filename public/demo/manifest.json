@@ -1,0 +1,223 @@
+{
+  "set": "Mythic Menagerie (fictional demo set)",
+  "cards": [
+    {
+      "id": "c01",
+      "file": "c01-emberfox.jpg",
+      "name": "Emberfox",
+      "number": "012/180",
+      "defects": [],
+      "truth": {
+        "ceiling": 10,
+        "counterfeit": false,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c02",
+      "file": "c02-tidepup.jpg",
+      "name": "Tidepup",
+      "number": "034/180",
+      "defects": [],
+      "truth": {
+        "ceiling": 9,
+        "counterfeit": false,
+        "borders": {
+          "left": 26,
+          "right": 20,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c03",
+      "file": "c03-thornback.jpg",
+      "name": "Thornback",
+      "number": "051/180",
+      "defects": [],
+      "truth": {
+        "ceiling": 6,
+        "counterfeit": false,
+        "borders": {
+          "left": 35,
+          "right": 13,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c04",
+      "file": "c04-voltwing.jpg",
+      "name": "Voltwing",
+      "number": "067/180",
+      "defects": [
+        "corners"
+      ],
+      "truth": {
+        "ceiling": 8,
+        "counterfeit": false,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c05",
+      "file": "c05-glimmerkoi.jpg",
+      "name": "Glimmerkoi",
+      "number": "088/180",
+      "defects": [
+        "scratches"
+      ],
+      "truth": {
+        "ceiling": 7,
+        "counterfeit": false,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c06",
+      "file": "c06-stonebrow.jpg",
+      "name": "Stonebrow",
+      "number": "095/180",
+      "defects": [
+        "crease"
+      ],
+      "truth": {
+        "ceiling": 5,
+        "counterfeit": false,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c07",
+      "file": "c07-frostling.jpg",
+      "name": "Frostling",
+      "number": "103/180",
+      "defects": [
+        "fake"
+      ],
+      "truth": {
+        "ceiling": 10,
+        "counterfeit": true,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c08",
+      "file": "c08-mossmaw.jpg",
+      "name": "Mossmaw",
+      "number": "117/180",
+      "defects": [
+        "holo"
+      ],
+      "truth": {
+        "ceiling": 10,
+        "counterfeit": false,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c09",
+      "file": "c09-sparkfin.jpg",
+      "name": "Sparkfin",
+      "number": "126/180",
+      "defects": [
+        "edges"
+      ],
+      "truth": {
+        "ceiling": 7,
+        "counterfeit": false,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c10",
+      "file": "c10-duskowl.jpg",
+      "name": "Duskowl",
+      "number": "139/180",
+      "defects": [],
+      "truth": {
+        "ceiling": 9,
+        "counterfeit": false,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 27,
+          "bottom": 19
+        }
+      }
+    },
+    {
+      "id": "c11",
+      "file": "c11-cindermole.jpg",
+      "name": "Cindermole",
+      "number": "152/180",
+      "defects": [
+        "lightcorner"
+      ],
+      "truth": {
+        "ceiling": 9,
+        "counterfeit": false,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    },
+    {
+      "id": "c12",
+      "file": "c12-brambleboar.jpg",
+      "name": "Brambleboar",
+      "number": "171/180",
+      "defects": [],
+      "truth": {
+        "ceiling": 10,
+        "counterfeit": false,
+        "borders": {
+          "left": 23,
+          "right": 23,
+          "top": 23,
+          "bottom": 23
+        }
+      }
+    }
+  ]
+}
